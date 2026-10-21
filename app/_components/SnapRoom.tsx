@@ -4,6 +4,7 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { UploadButton } from "../_lib/uploadThing";
 import { useRouter } from "next/navigation";
+import LoadingScreen from "./LoadingScreen";
 
 interface Room {
   id: string
@@ -208,7 +209,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 text-neutral-900">
+    <div className="max-w-9xl mx-auto px-4 py-8 text-neutral-900">
       <div className="mb-6">
         <Link
           href="/"
@@ -301,9 +302,11 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
       </div>
 
       {loading && (
-        <p className="text-sm text-neutral-500 py-8 text-center">
-          Loading photos...
-        </p>
+        <LoadingScreen
+          message="Loading dumps.."
+          subtext="unpacking snaps hangtight,, don't close the tab"
+          fullScreen={true}
+        />
       )}
 
       {!loading && photos.length === 0 && (
