@@ -3,17 +3,37 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { UploadButton } from "../_lib/uploadThing";
+import { useRouter } from "next/navigation";
 
+interface Room {
+  id: string
+  name: string
+  delete_pin: string
+}
 
 export default function SnapRoom({ params }: { params: Promise<{ roomId: string }> }) {
 
   const resolvedParams = use(params)
   const roomId = resolvedParams?.roomId
-  const [photos, setPhotos] = useState<{url: string, id: string}[]>([]);
+  const router = useRouter()
+  const [roomNotFound, setRoomNotFound] = useState(false)
+  const [room, setRoom] = useState<Room | null>(null)
+  const [photos, setPhotos] = useState<{ url: string, id: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const [selectMultiple, setSelectMultiple] = useState<boolean>(false)
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
+  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([])
+
+  const [deleteRoomPopup, setDeleteRoomPopup] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (!roomId) {
+      router.push("/")
+    }
+    fetchRoom()
+
+  }, [roomId])
+
   useEffect(() => {
 
     fetchPhotos()
@@ -23,18 +43,33 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
     try {
       const result = await fetch(`/api/photos/${roomId}`, { cache: "no-store" });
       if (!result.ok) {
-        console.error("Failed to fetch photos");
-        return;
+        alert("Failed to fetch photos")
+        return
       }
       const data = await result.json();
-      setPhotos(data);
+      setPhotos(data)
     } catch (err) {
-      console.error("Fetch error:", err);
+      alert(`Fetch error: ${err}`)
     } finally {
       setLoading(false);
     }
 
   }
+  async function fetchRoom() {
+    try {
+      const response = await fetch(`/api/room/${roomId}`, { cache: "no-store" })
+      console.log("Response status:", typeof response.status)
+      if (!response.ok && response.status === 404) {
+        setRoomNotFound(true)
+        return
+      }
+      const data = await response.json()
+      setRoom(data)
+    } catch (error) {
+      alert(`Error fetching room: ${error}`)
+    }
+  }
+
   const handleDownload = async (url: string, index: number) => {
     try {
       const res = await fetch(url)
@@ -102,6 +137,11 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   }
 
   const handleDeletePhoto = async (photoId: string) => {
+
+    if (!confirm("Are you sure you want to delete this photo? This action cannot be undone.")) {
+      return;
+    }
+
     try {
       const res = await fetch(`/api/photos/${roomId}`, {
         method: "DELETE",
@@ -114,13 +154,58 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
       if (!res.ok) {
         throw new Error("Failed to delete photo");
       }
-
-      // Update the photos list
-      setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+      setPhotos((prev) => prev.filter((p) => p.id !== photoId))
     } catch (error) {
-      console.error("Error deleting photo:", error);
+      alert(`Error deleting photo: ${error}`)
     }
-  };
+  }
+
+  const handleDeleteRoom = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const delete_pin = (e.currentTarget.elements[0] as HTMLInputElement).value
+
+    if (!delete_pin) {
+      alert("Please enter the delete pin.")
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/room/${roomId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ delete_pin }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error );
+      }
+      alert("Room deleted successfully.")
+      localStorage.removeItem("roomId")
+      router.push("/")
+    } catch (error) {
+      alert(`Error deleting room: ${error}`)
+    }
+  }
+
+  if (roomNotFound) {
+    return (<>
+      <div className="text-center border border-red-400 rounded-lg p-8 mt-32 m-4">
+        <h4
+          className="text-lg font-semibold text-neutral-900"
+        >Room not found.
+        </h4>
+        <p className="text-sm text-neutral-500 mt-2">
+          The room you are trying to access does not exist. Please check the room ID and try again.
+        </p>
+        <Link href="/" className="text-blue-600 hover:underline mt-4 inline-block">
+          Go back to Home
+        </Link>
+      </div>
+    </>)
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 text-neutral-900">
@@ -149,13 +234,15 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-neutral-200">
         <div>
-          <h1 className="text-xl font-bold text-neutral-900">Room: {roomId}</h1>
+          <h1 className="text-xl font-bold text-neutral-900">Room: {room?.name || "No room found"}</h1>
           <p className="text-sm text-neutral-600 mt-1">
             Share ID with friends:{" "}
             <span className="font-mono text-xs bg-neutral-100 text-neutral-800 border border-neutral-300 px-2 py-0.5 rounded">
               {roomId}
             </span>
           </p>
+          <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded" 
+          onClick={() => setDeleteRoomPopup(true)}>Delete Room</button>
         </div>
 
 
@@ -232,8 +319,8 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
           return (
             <div
               key={photo.id}
-              onClick={() =>{
-                if(selectMultiple){
+              onClick={() => {
+                if (selectMultiple) {
                   selectMultipleImages(photo.url)
                 }
               }}
@@ -287,7 +374,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
                     type="button"
                     className="bg-black/75 hover:bg-red-600 text-white rounded w-7 h-7 flex items-center justify-center text-base leading-none"
                     title="Delete photo"
-                    onClick={()=>{
+                    onClick={() => {
                       handleDeletePhoto(photo.id)
                     }}
                   >
@@ -299,6 +386,41 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
           );
         })}
       </div>
+      {deleteRoomPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl border border-neutral-200 text-neutral-900">
+            <h3 className="text-lg font-bold">Delete Room</h3>
+            <p className="text-sm text-neutral-600 mt-1 mb-4">
+              Enter the 4-digit host PIN to delete this room and all its photos.
+          </p>
+
+          <form onSubmit={(e) => handleDeleteRoom(e)}>
+            <input
+              type="password"
+              maxLength={4}
+              placeholder="Enter 4-digit PIN"
+              className="w-full border border-neutral-300 rounded px-3 py-2 text-sm tracking-widest focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
+              required
+            />
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setDeleteRoomPopup(false)} // handle close popup
+                className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded"
+              >
+                Confirm Delete
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>)}
 
     </div>
   )

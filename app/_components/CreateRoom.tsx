@@ -29,20 +29,20 @@ export default function CreateRoom() {
         if (!state?.success || !state?.roomId) return
         const handlePhotoUploadComplete = async () => {
 
+            localStorage.setItem("roomId", typeof state.roomId=== "string"? state.roomId: "")
+
             if (selectedPhotos.length === 0) {
-                setUploadStatus("No photos to upload.");
-                return;
+                setUploadStatus("No photos to upload.")
+                return router.push(`/room/${state.roomId}`)
             }
 
             setUploadStatus("Photo uploading...")
 
             await startUpload(selectedPhotos, { roomId: (state?.roomId) as string });
 
-            // Clean up object URLs
-            previewPhotos.forEach((url) => URL.revokeObjectURL(url));
-
-            // Navigate to the newly created room
-            router.push(`/room/${state.roomId}`);
+            
+            previewPhotos.forEach((url) => URL.revokeObjectURL(url))
+            router.push(`/room/${state.roomId}`)
 
         }
         handlePhotoUploadComplete()
@@ -98,7 +98,7 @@ export default function CreateRoom() {
             {state?.success === false && <p className=" border-2 border-red-500 rounded-lg bg-transparent text-red-500 text-center px-1.5 py-2 m-1">
                 {state.error} <br /> {state.message}</p>}
             {state?.success === true && <p className=" border-2 border-green-500 rounded-lg bg-transparent text-green-500 text-center px-1.5 py-2 m-1">
-                {state.message}</p>}
+                {state.message} | {state.roomId}</p>}
             <form action={formAction}>
                 <label>
                     Room Name:
