@@ -120,12 +120,12 @@ export default function CreateRoom() {
             <h2 className="text-2xl font-bold tracking-tight mb-6">Create a New Room</h2>
 
             {state?.success === false && (
-                <div className="border-2 border-red-500 rounded-xl bg-red-50 text-red-600 text-sm p-3 mb-6 font-medium">
+                <div className="border-2 border-red-500 rounded-sm bg-red-50 text-red-600 text-sm p-3 mb-6 font-medium">
                     {state.error} {state.message && <><br />{state.message}</>}
                 </div>
             )}
             {state?.success === true && (
-                <div className="border-2 border-emerald-500 rounded-xl bg-emerald-50 text-emerald-700 text-sm p-3 mb-6 font-medium">
+                <div className="border-2 border-emerald-500 rounded-sm bg-emerald-50 text-emerald-700 text-sm p-3 mb-6 font-medium">
                     {state.message} | <span className="font-mono">{state.roomId}</span>
                 </div>
             )}
@@ -140,7 +140,7 @@ export default function CreateRoom() {
                         name="roomName"
                         required
                         placeholder="e.g. Birthday Trip 2026"
-                        className="w-full border-2 border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-neutral-900 transition-colors"
+                        className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm focus:outline-none focus:border-neutral-900 transition-colors"
                     />
                 </div>
 
@@ -155,7 +155,7 @@ export default function CreateRoom() {
                             placeholder="4781"
                             maxLength={4}
                             required
-                            className="w-full border-2 border-neutral-300 rounded-xl px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
+                            className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
                         />
                     </div>
                     <div>
@@ -168,7 +168,7 @@ export default function CreateRoom() {
                             placeholder="4781"
                             maxLength={4}
                             required
-                            className="w-full border-2 border-neutral-300 rounded-xl px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
+                            className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
                         />
                     </div>
                 </div>
@@ -183,14 +183,14 @@ export default function CreateRoom() {
                         ref={photoInputRef}
                         multiple
                         onChange={handlePhotoInputChange}
-                        className="w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800 cursor-pointer border-2 border-dashed border-neutral-300 rounded-xl p-3"
+                        className="w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-xs file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800 cursor-pointer border-2 border-dashed border-neutral-300 rounded-sm p-3"
                     />
                 </div>
 
                 {previewPhotos.length > 0 && (
                     <div className="flex flex-wrap gap-2.5 pt-2">
                         {previewPhotos.map((photoUrl, index) => (
-                            <div key={index} className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-neutral-300">
+                            <div key={index} className="relative w-20 h-20 rounded-sm overflow-hidden border-2 border-neutral-300">
                                 <img src={photoUrl} alt={`Selected ${index + 1}`} className="w-full h-full object-cover" />
                                 <button
                                     type="button"
@@ -205,7 +205,7 @@ export default function CreateRoom() {
                 )}
 
                 {uploadStatus && (
-                    <p className="text-xs font-mono text-blue-600 bg-blue-50 border border-blue-200 rounded-lg p-2 text-center">
+                    <p className="text-xs font-mono text-blue-600 bg-blue-50 border border-blue-200 rounded-md p-2 text-center">
                         {uploadStatus}
                     </p>
                 )}
