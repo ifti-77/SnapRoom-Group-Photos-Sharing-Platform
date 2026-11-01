@@ -60,7 +60,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 max-w-xl">
             <Link
-              href="/room/new/createroom"
+              href="/createroom"
               className="bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-semibold px-6 py-3 rounded text-center transition-colors flex items-center justify-center gap-2 shrink-0"
             >
               Create a Room &rarr;

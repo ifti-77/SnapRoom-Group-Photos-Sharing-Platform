@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useEffect, useRef, useState } from "react"
-import { createRoom } from "../room/new/createroom/createRoom.action"
+import { createRoom } from "../createroom/createRoom.action"
 import { useUploadThing } from "../_lib/uploadThing"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -138,6 +138,7 @@ export default function CreateRoom() {
                     <input
                         type="text"
                         name="roomName"
+                        defaultValue={state?.success ? "" : state?.previousValues?.roomName || ""}
                         required
                         placeholder="e.g. Birthday Trip 2026"
                         className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm focus:outline-none focus:border-neutral-900 transition-colors"
@@ -147,14 +148,15 @@ export default function CreateRoom() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5">
-                            Delete PIN (4 digits)
+                            Password PIN (4 digits) <i className="text-xs text-neutral-400">(Optional)</i>
                         </label>
                         <input
                             type="password"
                             name="delete_pin"
                             placeholder="4781"
+                            defaultValue={state?.success ? "" : state?.previousValues?.delete_pin || ""}
                             maxLength={4}
-                            required
+                            minLength={4}
                             className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
                         />
                     </div>
@@ -165,9 +167,10 @@ export default function CreateRoom() {
                         <input
                             type="password"
                             name="confirm_delete_pin"
+                            defaultValue={state?.success ? "" : state?.previousValues?.confirm_delete_pin || ""}
                             placeholder="4781"
                             maxLength={4}
-                            required
+                            minLength={4}
                             className="w-full border-2 border-neutral-300 rounded-sm px-4 py-2.5 text-sm tracking-widest focus:outline-none focus:border-neutral-900 transition-colors"
                         />
                     </div>

@@ -18,16 +18,14 @@ export default function LoadingScreen({
       } text-neutral-900 select-none`}
     >
       <div className="w-full max-w-xs border-2 border-neutral-900 bg-white p-6 flex flex-col items-center text-center">
-        {/* Brutalist square bouncing dots */}
         <div className="flex items-center gap-1.5 mb-5">
           <span className="w-2.5 h-2.5 bg-neutral-900 animate-bounce [animation-delay:-0.3s]" />
           <span className="w-2.5 h-2.5 bg-neutral-900 animate-bounce [animation-delay:-0.15s]" />
           <span className="w-2.5 h-2.5 bg-neutral-900 animate-bounce" />
         </div>
 
-        {/* Monospace Status Tag */}
         <span className="text-[10px] font-mono uppercase tracking-widest bg-neutral-100 border border-neutral-300 px-2 py-0.5 mb-3 text-neutral-600">
-          syncing // buffer
+          Program is running
         </span>
 
         {/* Main message */}
