@@ -3,21 +3,23 @@ import { neon } from "@neondatabase/serverless";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ roomId: string }> }
+  { params }: { params: Promise<{ roomId: string}>}
 ) {
   try {
-    const { roomId } = await params;
+    let { roomId, } = await params;
 
     if (!roomId) {
       return NextResponse.json({ error: "Room ID is required" }, { status: 400 });
     }
+
+    
 
     const sql = neon(process.env.DATABASE_URL!);
 
     const photos = await sql`
       SELECT id, url, file_key, name 
       FROM photos 
-      WHERE room_id = ${roomId} 
+      WHERE room_id = ${roomId}
       ORDER BY created_at DESC
     `;
 

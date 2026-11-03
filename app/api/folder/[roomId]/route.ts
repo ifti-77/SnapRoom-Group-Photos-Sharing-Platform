@@ -14,11 +14,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ roo
     try {
     const {roomId} = await params
     const body = await request.json()
-    const { name }:{ name: string} = body
-
+    const { name, parent_folder_id }:{ name: string, parent_folder_id: string | null } = body
     const database = await neon(process.env.DATABASE_URL as string)
 
-    const [folder] = await database`INSERT INTO folders (name, room_id) VALUES (${name.trim()}, ${roomId}) RETURNING *`
+    const [folder] = await database`INSERT INTO folders (name, room_id, parent_folder_id) VALUES (${name.trim()}, ${roomId}, ${parent_folder_id}) RETURNING *`
     return new Response(JSON.stringify(folder), { status: 201 })
     } catch (error) {
         return new Response(

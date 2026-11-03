@@ -15,12 +15,12 @@ export const ourFileRouter = {
       maxFileCount: 10,
     },
   })
-    .input(z.object({ roomId: z.string().min(1) }))
+    .input(z.object({ roomId: z.string().min(1), folderId: z.string().optional().nullable() }))
     .middleware(async ({ input }) => {
 
       if (!process.env.DATABASE_URL) throw new UploadThingError("Database connection string is missing");
 
-      return { roomId: input.roomId };
+      return { roomId: input.roomId, folderId: input.folderId || null };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
@@ -29,13 +29,14 @@ export const ourFileRouter = {
       // console.log("file url", file.ufsUrl);
       const database = neon(process.env.DATABASE_URL as string);
 
-      await database`INSERT INTO photos (room_id, file_key, url, name, size)
+      await database`INSERT INTO photos (room_id, file_key, url, name, size, folder_id)
         VALUES (
           ${metadata.roomId},
           ${file.key},
           ${file.ufsUrl || file.url},
           ${file.name},
-          ${file.size}
+          ${file.size},
+          ${metadata.folderId}
         )`
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback

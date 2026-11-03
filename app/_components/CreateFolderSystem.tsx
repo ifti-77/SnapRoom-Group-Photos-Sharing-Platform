@@ -1,7 +1,9 @@
 import { useState } from "react"
+import { FolderStructure } from "../_types/customTypes"
 
 
-function CreateFolderSystem({ roomId }: { roomId: string }) {
+
+function CreateFolderSystem({ roomId, folderState, fetchRoom }: { roomId: string, folderState: FolderStructure, fetchRoom: () => void }) {
 
     const [createFolderPopup, setCreateFolderPopup] = useState(false)
 
@@ -20,7 +22,7 @@ function CreateFolderSystem({ roomId }: { roomId: string }) {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name: name })
+                body: JSON.stringify({ name: name, parent_folder_id: folderState.currentFolder?.id || null })
             })
 
             if (!respone.ok) {
@@ -28,6 +30,7 @@ function CreateFolderSystem({ roomId }: { roomId: string }) {
             }
 
             setCreateFolderPopup(false)
+            fetchRoom()
             alert("Folder created successfully")
         } catch (error) {
             alert(error)
