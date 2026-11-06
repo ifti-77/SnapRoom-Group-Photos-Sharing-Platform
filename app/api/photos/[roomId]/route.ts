@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ roomId: string}>}
+  { params }: { params: Promise<{ roomId: string }> }
 ) {
   try {
     let { roomId, } = await params;
@@ -12,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: "Room ID is required" }, { status: 400 });
     }
 
-    
+
 
     const sql = neon(process.env.DATABASE_URL!);
 
@@ -23,7 +26,7 @@ export async function GET(
       ORDER BY created_at DESC
     `;
 
-    const photoUrls = photos.map((p) => ({url:p.url, id: p.id}));
+    const photoUrls = photos.map((p) => ({ url: p.url, id: p.id }));
 
     return NextResponse.json(photoUrls);
   } catch (error) {
@@ -46,19 +49,55 @@ export async function DELETE(
     if (!roomId) {
       return NextResponse.json({ error: "Room ID is required" }, { status: 400 });
     }
-    if (!body || !body.photoId) {
-      return NextResponse.json({ error: "Photo ID is required" }, { status: 400 });
+
+    const sql = await neon(process.env.DATABASE_URL!)
+    const { photoIds }: { photoIds: string[] } = body
+
+    if (!photoIds || !Array.isArray(photoIds) || photoIds.length === 0) {
+      return NextResponse.json(
+        { error: "photoIds array is required and must not be empty" },
+        { status: 400 }
+      )
     }
-    const sql = neon(process.env.DATABASE_URL!);
-    const { photoId } = body
+
+    const photosToDelete = await sql`
+      SELECT id, file_key 
+      FROM photos 
+      WHERE room_id = ${roomId} 
+        AND id = ANY(${photoIds})
+    `;
+
+    if (photosToDelete.length === 0) {
+      return NextResponse.json(
+        { error: "No matching photos found to delete" },
+        { status: 404 }
+      );
+    }
+
+    const fileKeys = photosToDelete
+      .map((p) => p.file_key)
+      .filter((key): key is string => Boolean(key));
+
+
+    if (fileKeys.length > 0) {
+      await utapi.deleteFiles(fileKeys);
+    }
 
     await sql`
       DELETE FROM photos 
-      WHERE room_id = ${roomId} AND id = ${photoId}
+      WHERE room_id = ${roomId} 
+        AND id = ANY(${photoIds})
     `;
-    return NextResponse.json({ message: "Photo deleted successfully" });
-  }catch (error) {
-    console.error("Error deleting photos:", error);
+
+    return NextResponse.json(
+      {
+        success: true,
+        deletedCount: photosToDelete.length,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Bulk delete error:", error);
     return NextResponse.json(
       { error: "Failed to delete photos" },
       { status: 500 }

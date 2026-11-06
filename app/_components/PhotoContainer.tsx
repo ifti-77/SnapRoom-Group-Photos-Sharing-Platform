@@ -1,15 +1,16 @@
 
 import React from 'react'
+import { Photo } from '../_types/customTypes'
 
 const PhotoContainer = ({ photos, setPhotos, roomId,
     selectedPhotos,
     selectMultipleImages,
     selectMultiple,
     handleDownload }: {
-        photos: { url: string, id: string }[], setPhotos: React.Dispatch<React.SetStateAction<{ url: string, id: string }[]>>,
+        photos: Photo[], setPhotos: React.Dispatch<React.SetStateAction<Photo[]>>,
         roomId: string,
-        selectedPhotos: string[],
-        selectMultipleImages: (url: string) => void,
+        selectedPhotos: Photo[],
+        selectMultipleImages: (photo: Photo) => void,
         selectMultiple: boolean
         handleDownload: (url: string, index: number) => void
     }) => {
@@ -26,7 +27,7 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ photoId }),
+                body: JSON.stringify({ photoIds: [photoId] }),
             });
 
             if (!res.ok) {
@@ -41,14 +42,14 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
     return (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {photos.map((photo, index) => {
-                const isSelected = selectedPhotos.includes(photo.url);
+                const isSelected = selectedPhotos.includes(photo);
 
                 return (
                     <div
                         key={photo.id}
                         onClick={() => {
                             if (selectMultiple) {
-                                selectMultipleImages(photo.url)
+                                selectMultipleImages(photo)
                             }
                         }}
                         className={`relative aspect-square rounded overflow-hidden border bg-neutral-100 ${selectMultiple ? "cursor-pointer" : ""
@@ -67,7 +68,7 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
                             <input
                                 type="checkbox"
                                 checked={isSelected}
-                                onChange={() => selectMultipleImages(photo.url)}
+                                onChange={() => selectMultipleImages(photo)}
                                 onClick={(e) => e.stopPropagation()}
                                 className="absolute top-2.5 left-2.5 w-4 h-4 accent-blue-600 cursor-pointer pointer-events-none"
                             />

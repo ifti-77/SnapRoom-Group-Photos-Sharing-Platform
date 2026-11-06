@@ -6,7 +6,7 @@ export async function GET(
     { params }: { params: Promise<{ roomId: string }> }) {
     try {
         const { roomId } = await params
-        const database = neon(process.env.DATABASE_URL as string)
+        const database = await neon(process.env.DATABASE_URL as string)
         const room = await database`SELECT 
                                     r.id, 
                                     r.name, 
@@ -52,7 +52,7 @@ export async function POST(
             return NextResponse.json({ error: "Password is required" }, { status: 400 })
         }
 
-        const database = neon(process.env.DATABASE_URL as string)
+        const database = await neon(process.env.DATABASE_URL as string)
 
         const currentRoom = await database`
             Select * from rooms where id = ${roomId} and delete_pin = ${String(delete_pin).trim()}
@@ -87,7 +87,7 @@ export async function DELETE(
             return NextResponse.json({ error: "Delete pin is required" }, { status: 400 })
         }
 
-        const database = neon(process.env.DATABASE_URL as string)
+        const database = await neon(process.env.DATABASE_URL as string)
 
         const rooms = await database`
             SELECT id FROM rooms 

@@ -6,7 +6,7 @@ import { UploadButton } from "../_lib/uploadThing";
 import { useRouter } from "next/navigation";
 import LoadingScreen from "./LoadingScreen";
 import { QRCodeSVG } from "qrcode.react";
-import { DeletePin, FolderStructure, RoomData } from "../_types/customTypes"
+import { DeletePin, Folder, FolderStructure, Photo, RoomData } from "../_types/customTypes"
 import PasswordPupUp from "./PasswordPupUp";
 import { getCookie } from "cookies-next"
 import CreateFolderSystem from "./CreateFolderSystem";
@@ -24,12 +24,12 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   const router = useRouter()
   const [roomNotFound, setRoomNotFound] = useState(false)
   const [room, setRoom] = useState<RoomData | null>(null)
-  const [photos, setPhotos] = useState<{ url: string, id: string }[]>([]);
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isZipping, setIsZipping] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [selectMultiple, setSelectMultiple] = useState<boolean>(false)
-  const [selectedPhotos, setSelectedPhotos] = useState<string[]>([])
+  const [selectedPhotos, setSelectedPhotos] = useState<Array<Photo>>([])
 
 
   const [deleteRoomPopup, setDeleteRoomPopup] = useState<boolean>(false)
@@ -41,6 +41,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   const [showQRCode, setShowQRCode] = useState<boolean>(false)
 
   const [folderState, setFolderState] = useState<FolderStructure>({ currentFolder: null, parentFolder: null })
+  const [moveFolderInstance, setMoveFolderInstance] = useState<Folder | null>(null)
 
   const roomUrl = typeof window !== "undefined" ? window.location.href : ""
 
@@ -63,7 +64,8 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
 
   async function fetchPhotos() {
     try {
-      const result = await fetch(`/api/photos?roomId=${roomId}${folderState.currentFolder !== null ? `&folderId=${folderState.currentFolder?.id || ""}` : ""}`, { cache: "no-store" });
+      setLoading(true)
+      const result = await fetch(`/api/photos?roomId=${roomId}${folderState.currentFolder !== null ? `&folderId=${folderState.currentFolder?.id || ""}` : ""}`, { cache: "default" });
       if (!result.ok) {
         alert("Failed to fetch photos")
         return
@@ -80,7 +82,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   async function fetchRoom() {
     try {
       const response = await fetch(`/api/room/${roomId}`, { cache: "no-store" })
-      console.log("Response status:", typeof response.status)
+
       if (!response.ok && response.status === 404) {
         setRoomNotFound(true)
         return
@@ -117,10 +119,10 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
     }
   }
 
-  const selectMultipleImages = (image: string) => {
+  const selectMultipleImages = (photo: Photo) => {
 
     setSelectedPhotos((prev) =>
-      prev.includes(image) ? prev.filter((img) => img !== image) : [...prev, image]
+      prev.includes(photo) ? prev.filter((p) => p.id !== photo.id) : [...prev, photo]
     )
   }
 
@@ -128,7 +130,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
     if (selectedPhotos.length === photos.length) {
       setSelectedPhotos([]);
     } else {
-      setSelectedPhotos([...photos.map((photo) => photo.url)]);
+      setSelectedPhotos([...photos.map((photo) => photo)]);
     }
   }
 
@@ -142,8 +144,8 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
       const zip = new JSZip();
 
       await Promise.all(
-        selectedPhotos.map(async (url, idx) => {
-          const res = await fetch(url);
+        selectedPhotos.map(async (photo, idx) => {
+          const res = await fetch(photo.url);
           const blob = await res.blob();
           const mimeSubtype = blob.type.split("/")[1] || "jpg"
           const ext = mimeSubtype === "jpeg" ? "jpg" : mimeSubtype.split("+")[0]
@@ -170,8 +172,8 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
 
     try {
       setIsDownloading(true)
-      await Promise.all(selectedPhotos.map(async (url, idx) => {
-        await handleDownload(url, idx)
+      await Promise.all(selectedPhotos.map(async (photo, idx) => {
+        await handleDownload(photo.url, idx)
       }))
     } catch (error) {
       console.error("Failed to download photos:", error)
@@ -219,6 +221,76 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
     }
   }
 
+  const handleDeleteSelectedPhotos = async () => {
+    if (selectedPhotos.length === 0) return
+
+    if (!confirm("Are you sure you want to delete the selected photos? This action cannot be undone.")) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/photos/${roomId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ photoIds: [selectedPhotos.map((p) => p.id)] }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete photos");
+      }
+      setPhotos((prev) => prev.filter((p) => !selectedPhotos.includes(p)))
+      setSelectedPhotos([])
+      setSelectMultiple(false)
+      alert("Selected photos deleted successfully.")
+    } catch (error) {
+      alert(`Error deleting photos: ${error}`)
+    }
+  }
+
+
+  const handleMoveFolder = async (name: string, folderId: string, targetFolderId: string | null) => {
+
+    console.log("Moving folder:", { name, folderId, targetFolderId })
+
+    if (!folderId) {
+      alert("Invalid folder selection for moving.")
+      return
+    }
+    else if (folderId === targetFolderId) {
+      alert("Cannot move a folder into itself.")
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/folder/${roomId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          folder_id: folderId,
+          parent_folder_id: targetFolderId
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error)
+      }
+      const updateData = await fetch(`/api/room/${roomId}`, { cache: "no-store" })
+      const updateRoomData = await updateData.json()
+      setRoom(updateRoomData)
+      setMoveFolderInstance(null)
+
+    } catch (error) {
+      console.error("Error moving folder:", error);
+    }
+  }
+
+
   if (roomNotFound) {
     return (<>
       <div className="text-center border border-red-400 rounded-lg p-8 mt-32 m-4">
@@ -264,7 +336,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
       {passwordRequired && <PasswordPupUp roomId={room?.id || ""} setPasswordRequired={setPasswordRequired} />}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-neutral-200">
-        <div>
+        <div className=" flex flex-col gap-2">
           <h1 className="text-xl font-bold text-neutral-900">Room: {room?.name || "No room found"}</h1>
           <p className="text-sm text-neutral-600 mt-1">
             Share ID with friends:{" "}
@@ -343,37 +415,47 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
             </button>
           )}
           {selectMultiple && (
-            <>
-              <button
-                type="button"
-                onClick={handleSelectAll}
-                className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
-              >
-                {selectedPhotos.length === photos.length
-                  ? "Deselect All"
-                  : "Select All"}
-              </button>
+            <div className="flex flex-col flex-wrap items-start gap-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleSelectAll}
+                  className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
+                >
+                  {selectedPhotos.length === photos.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </button>
 
-              <button
-                type="button"
-                disabled={downloadAsZip ? (selectedPhotos.length <= 1 || isZipping) : (selectedPhotos.length < 1 || isDownloading)}
-                onClick={() => {
-                  if (downloadAsZip) {
-                    handleDownloadZip()
-                  } else {
-                    handleBlukDownload()
-                  }
-                }}
-                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded"
-              >
-                {downloadAsZip ? (isZipping
-                  ? "Zipping..."
-                  : `Download ZIP (${selectedPhotos.length})`) : (isDownloading
-                    ? "Downloading..."
-                    : `Download (${selectedPhotos.length})`)}
-              </button>
-              <input type="checkbox" checked={downloadAsZip} onChange={() => setDownloadAsZip(!downloadAsZip)}></input>
-            </>
+                <button
+                  type="button"
+                  disabled={downloadAsZip ? (selectedPhotos.length <= 1 || isZipping) : (selectedPhotos.length < 1 || isDownloading)}
+                  onClick={() => {
+                    if (downloadAsZip) {
+                      handleDownloadZip()
+                    } else {
+                      handleBlukDownload()
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded"
+                >
+                  {downloadAsZip ? (isZipping
+                    ? "Zipping..."
+                    : `Download ZIP (${selectedPhotos.length})`) : (isDownloading
+                      ? "Downloading..."
+                      : `Download (${selectedPhotos.length})`)}
+                </button>
+                <input type="checkbox" checked={downloadAsZip} onChange={() => setDownloadAsZip(!downloadAsZip)} name="downloadAsZip"></input>
+                <label htmlFor="downloadAsZip" className="text-sm text-neutral-600">Download as ZIP</label>
+              </div>
+              <div className="flex gap-2 ">
+                <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded"
+                  onClick={handleDeleteSelectedPhotos}
+                >
+                  Delete Selected
+                </button>
+              </div>
+            </div>
           )}
           {roomId && (
             <div className="shrink-0">
@@ -403,19 +485,22 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
         />
       )}
 
-      <FoldersContainer room={room as RoomData} 
-      folderState={folderState as FolderStructure} 
-      setFolderState={setFolderState}></FoldersContainer>
-      
+      <FoldersContainer room={room as RoomData}
+        setRoom={setRoom}
+        moveFolderInstance={moveFolderInstance}
+        setMoveFolderInstance={setMoveFolderInstance}
+        folderState={folderState as FolderStructure}
+        setFolderState={setFolderState}></FoldersContainer>
+
       {!loading && photos.length === 0 && (
         <div className="border border-dashed border-neutral-300 rounded py-12 text-center">
           <p className="text-neutral-500 text-sm">No photos in this room yet.</p>
         </div>
       )}
 
-      <PhotoContainer photos={photos} setPhotos={setPhotos} roomId={roomId} 
-      selectedPhotos={selectedPhotos} selectMultipleImages={selectMultipleImages} 
-      selectMultiple={selectMultiple} handleDownload={handleDownload}></PhotoContainer>
+      <PhotoContainer photos={photos} setPhotos={setPhotos} roomId={roomId}
+        selectedPhotos={selectedPhotos} selectMultipleImages={selectMultipleImages}
+        selectMultiple={selectMultiple} handleDownload={handleDownload}></PhotoContainer>
 
       {deleteRoomPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -453,6 +538,24 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
             </form>
           </div>
         </div>)}
+
+      {moveFolderInstance && (
+        <div className="fixed h-24 w-64 m-auto bottom-2 inset-x-0 flex flex-col items-center justify-center bg-blue-500/75 border border-gray-300 rounded-4xl shadow-md py-6 px-3 z-50">
+          <p className="text-md text-center text-white font-mono">Move Folder</p>
+          <p className="text-center text-white font-mono font-bold">{moveFolderInstance?.name}</p>
+          <div className="flex justify-center gap-2">
+            <button className="text-xl text-center text-white font-mono hover:bg-gray-200/20 py-1 px-1 rounded-md"
+              onClick={() => handleMoveFolder(moveFolderInstance.name, moveFolderInstance.id, folderState.currentFolder?.id || null)}>
+              Move
+            </button>
+            <button className="text-xl text-center text-white font-mono hover:bg-gray-200/20 py-1 px-1" onClick={() => {
+              setMoveFolderInstance(null)
+            }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   )

@@ -14,7 +14,7 @@ export async function GET(
 
     
 
-    const sql = neon(process.env.DATABASE_URL!);
+    const sql = await neon(process.env.DATABASE_URL!);
 
     const photos = folderId? await sql`
       SELECT id, url, file_key, name 
@@ -54,7 +54,7 @@ export async function DELETE(
     if (!body || !body.photoId) {
       return NextResponse.json({ error: "Photo ID is required" }, { status: 400 });
     }
-    const sql = neon(process.env.DATABASE_URL!);
+    const sql = await neon(process.env.DATABASE_URL!);
     const { photoId } = body
 
     await sql`

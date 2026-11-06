@@ -3,6 +3,10 @@ export enum DeletePin{
     NoPin = "NoPin",
 }
 
+export interface Photo {
+    id: string
+    url: string
+}
 
 export interface Folder {
   id: string
