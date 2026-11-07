@@ -89,7 +89,7 @@ const ChatSystem = (ChatSystemProps: ChatSystemProps) => {
     const handleSendMessage = async (text: string, emoji: string) => {
 
         if (!userIdentity) {
-            alert("User identity not set. Please refresh the page.")
+            alert("User identity not set, Please refresh the page")
             return
         }
 
@@ -109,15 +109,15 @@ const ChatSystem = (ChatSystemProps: ChatSystemProps) => {
     return (
         <div>
             {openMessagePanel ? (
-                <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-120 max-h-[85vh] bg-white border border-gray-300 rounded-md shadow-sm z-50 flex flex-col overflow-hidden">
+                <div className="fixed bottom-4 right-4 w-80 sm:w-96 h-120 max-h-[85vh] bg-white border border-gray-300 rounded-md shadow-sm z-30 flex flex-col overflow-hidden">
                     <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 shrink-0 bg-white">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-gray-900">
+                            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-orange-900">
                                 Messages
                             </h3>
                             {myEmoji && (
-                                <span className="text-xs bg-gray-100 border border-gray-300 px-1.5 py-0.5 rounded font-mono">
-                                    You: {myEmoji}
+                                <span className="text-xs bbg-transparent border border-gray-300 px-1.5 py-0.5 rounded-full">
+                                    {myEmoji}
                                 </span>
                             )}
                         </div>
@@ -134,7 +134,7 @@ const ChatSystem = (ChatSystemProps: ChatSystemProps) => {
                         {messages.length === 0 ? (
                             <div className="flex items-center justify-center h-full">
                                 <span className="text-xs font-mono text-gray-400">
-                                    No messages yet.
+                                    No message
                                 </span>
                             </div>
                         ) : (
@@ -154,22 +154,21 @@ const ChatSystem = (ChatSystemProps: ChatSystemProps) => {
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                const form = e.currentTarget;
-                                const input = form.elements.namedItem("message") as HTMLInputElement;
+                                const form = e.currentTarget
+                                const input = form.elements.namedItem("message") as HTMLInputElement
                                 const text = input.value.trim()
 
                                 if (!myEmoji) {
                                     alert("Please select an avatar emoji before chatting.")
                                     return;
                                 }
-                                if (!text) return;
+                                if (!text) return
 
                                 handleSendMessage(text, myEmoji)
                                 input.value = ""
                             }}
                             className="flex items-center gap-1.5"
                         >
-                            {/* Real-time Unique Emoji Selector */}
                             <select
                                 value={myEmoji}
                                 onChange={(e) => {
@@ -217,7 +216,7 @@ const ChatSystem = (ChatSystemProps: ChatSystemProps) => {
                     </div>
                 </div>
             ) : (
-                <button onClick={() => setOpenMessagePanel(true)} className="fixed bottom-4 right-4 bg-blue-500 text-white p-2 rounded-full shadow-lg">
+                <button onClick={() => setOpenMessagePanel(true)} className="fixed bottom-4 right-4 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-200 z-30">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 26 26" height="26px" width="26px" fill="#e8eaed"><path d="M6,14h8V12H6v2Zm0-3H18V9H6v2ZM6,8H18V6H6V8ZM2,22V4Q2,3.17 2.59,2.59T4,2H20q0.83,0 1.41,0.59T22,4V16q0,0.82-0.59,1.41T20,18H6L2,22Zm3.15-6H20V4H4V17.13L5.15,16ZM4,16V4V16Z" /></svg>
                 </button>
             )}
