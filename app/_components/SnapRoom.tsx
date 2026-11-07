@@ -13,6 +13,8 @@ import CreateFolderSystem from "./CreateFolderSystem";
 import FoldersContainer from "./FoldersContainer";
 import PhotoContainer from "./PhotoContainer";
 
+import Pusher from "pusher-js";
+
 
 
 
@@ -45,6 +47,43 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
 
   const roomUrl = typeof window !== "undefined" ? window.location.href : ""
 
+  useEffect(() => {
+    if (!roomId) {
+      router.push("/")
+    }
+
+    Pusher.logToConsole = true
+    const pusherReciever = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+    })
+
+    const channel = pusherReciever.subscribe(`room-${roomId}`)
+    channel.bind("photo:uploaded", (data:any) => {
+      
+      fetchPhotos()
+    })
+    channel.bind("photos:deleted", (data:any) => {
+      
+      fetchPhotos()
+    })
+
+    channel.bind("folder:created", (data:any) => {
+      fetchRoom()
+    })
+    channel.bind("folder:updated", (data:any) => {
+      fetchRoom()
+    })
+    channel.bind("folder:deleted", (data:any) => {
+      fetchRoom()
+    })
+
+    return () => {
+    channel.unbind_all()
+    channel.unsubscribe()
+    pusherReciever.disconnect()
+  }
+
+  }, [roomId])
   useEffect(() => {
     if (!roomId) {
       router.push("/")
@@ -469,7 +508,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
                   allowedContent: "text-xs text-neutral-500 mt-1",
                 }}
                 onClientUploadComplete={async () => {
-                  await fetchPhotos();
+                  await fetchPhotos()
                 }}
               />
             </div>

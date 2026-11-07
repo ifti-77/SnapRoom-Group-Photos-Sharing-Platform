@@ -1,3 +1,4 @@
+import { pusherServer } from "@/app/_lib/pusherServer";
 import { neon } from "@neondatabase/serverless";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
@@ -23,10 +24,6 @@ export const ourFileRouter = {
       return { roomId: input.roomId, folderId: input.folderId || null };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      // console.log("Upload complete for userId:", metadata.userId);
-
-      // console.log("file url", file.ufsUrl);
       const database = neon(process.env.DATABASE_URL as string);
 
       await database`INSERT INTO photos (room_id, file_key, url, name, size, folder_id)
@@ -39,7 +36,7 @@ export const ourFileRouter = {
           ${metadata.folderId}
         )`
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
+      await pusherServer.trigger(`room-${metadata.roomId}`, "photo:uploaded", { message: "Photo uploaded", folderId: metadata.folderId });
       return { roomId: metadata.roomId };
     }),
 } satisfies FileRouter;

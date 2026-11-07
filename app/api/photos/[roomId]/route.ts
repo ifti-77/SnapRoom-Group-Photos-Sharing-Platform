@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { UTApi } from "uploadthing/server";
+import { pusherServer } from "@/app/_lib/pusherServer";
 
 const utapi = new UTApi();
 
@@ -89,6 +90,9 @@ export async function DELETE(
         AND id = ANY(${photoIds})
     `;
 
+    await pusherServer.trigger(`room-${roomId}`, "photos:deleted", {
+      message: "Photos deleted"
+    })
     return NextResponse.json(
       {
         success: true,

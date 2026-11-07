@@ -17,6 +17,8 @@
     "lucide-react": "^1.59.0",
     "nanoid": "^6.0.2",
     "next": "16.4.2",
+    "pusher": "^5.3.4",
+    "pusher-js": "^8.6.0",
     "qrcode.react": "^4.2.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

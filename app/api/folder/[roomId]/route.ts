@@ -1,3 +1,4 @@
+import { pusherServer } from "@/app/_lib/pusherServer"
 import { neon } from "@neondatabase/serverless"
 
 // export async function GET(request: Request, { params }: { params: { roomId: string } }) {
@@ -12,13 +13,16 @@ import { neon } from "@neondatabase/serverless"
 export async function POST(request: Request, { params }: { params: Promise<{ roomId: string }> }) {
 
     try {
-    const {roomId} = await params
-    const body = await request.json()
-    const { name, parent_folder_id }:{ name: string, parent_folder_id: string | null } = body
-    const database = await neon(process.env.DATABASE_URL as string)
+        const { roomId } = await params
+        const body = await request.json()
+        const { name, parent_folder_id }: { name: string, parent_folder_id: string | null } = body
+        const database = await neon(process.env.DATABASE_URL as string)
 
-    const [folder] = await database`INSERT INTO folders (name, room_id, parent_folder_id) VALUES (${name.trim()}, ${roomId}, ${parent_folder_id}) RETURNING *`
-    return new Response(JSON.stringify(folder), { status: 201 })
+        const [folder] = await database`INSERT INTO folders (name, room_id, parent_folder_id) VALUES (${name.trim()}, ${roomId}, ${parent_folder_id}) RETURNING *`
+        if (folder) {
+            await pusherServer.trigger(`room-${roomId}`, "folder:created", { folder })
+        }
+        return new Response(JSON.stringify(folder), { status: 201 })
     } catch (error) {
         return new Response(
             JSON.stringify({ error: error || "Failed to create folder" }),
@@ -32,7 +36,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ room
     try {
         const { roomId } = await params
         const body = await request.json()
-        const { name,parent_folder_id, folder_id }:{ name: string, parent_folder_id: string | null, folder_id: string } = body
+        const { name, parent_folder_id, folder_id }: { name: string, parent_folder_id: string | null, folder_id: string } = body
         if (!folder_id) {
             throw new Error("Folder ID is required")
         }
@@ -42,7 +46,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ room
         if (parent_folder_id === folder_id) {
             throw new Error("Parent folder ID cannot be the same as folder ID")
         }
-        
+
         const database = await neon(process.env.DATABASE_URL as string)
         const [folder] = parent_folder_id === undefined ? await database`UPDATE folders 
                                                                     SET name = ${name.trim()} 
@@ -51,6 +55,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ room
                                                                     SET name = ${name.trim()}, parent_folder_id = ${parent_folder_id} 
                                                                     WHERE id = ${folder_id} 
                                                                     RETURNING *`
+        if (folder) {
+            await pusherServer.trigger(`room-${roomId}`, "folder:updated", { folder })
+        }
         return new Response(JSON.stringify(folder), { status: 200 })
     } catch (error) {
         return new Response(
@@ -65,13 +72,17 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ r
     try {
         const { roomId } = await params
         const body = await request.json()
-        const { folder_id }:{ folder_id: string } = body
+        const { folder_id }: { folder_id: string } = body
         if (!folder_id) {
             throw new Error("Folder ID is required")
         }
-        
+
         const database = await neon(process.env.DATABASE_URL as string)
-        await database`DELETE FROM folders WHERE id = ${folder_id} AND room_id = ${roomId}`
+        const result = await database`DELETE FROM folders WHERE id = ${folder_id} AND room_id = ${roomId}`
+        
+        if (result) {
+            await pusherServer.trigger(`room-${roomId}`, "folder:deleted", { message:"folder deleted" })
+        }
         return new Response(JSON.stringify({ message: "Folder deleted successfully" }), { status: 200 })
     } catch (error) {
         return new Response(
