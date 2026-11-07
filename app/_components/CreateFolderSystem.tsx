@@ -6,6 +6,8 @@ import { FolderStructure } from "../_types/customTypes"
 function CreateFolderSystem({ roomId, folderState, fetchRoom }: { roomId: string, folderState: FolderStructure, fetchRoom: () => void }) {
 
     const [createFolderPopup, setCreateFolderPopup] = useState(false)
+    const [processing, setProcessing] = useState(false)
+
 
     const createFolder = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -17,6 +19,7 @@ function CreateFolderSystem({ roomId, folderState, fetchRoom }: { roomId: string
             if (!name) {
                 throw new Error("Folder name is required")
             }
+            setProcessing(true)
             const respone = await fetch(`/api/folder/${roomId}`, {
                 method: "POST",
                 headers: {
@@ -34,6 +37,9 @@ function CreateFolderSystem({ roomId, folderState, fetchRoom }: { roomId: string
             alert("Folder created successfully")
         } catch (error) {
             alert(error)
+        }
+        finally {
+            setProcessing(false)
         }
 
     }
@@ -53,8 +59,12 @@ function CreateFolderSystem({ roomId, folderState, fetchRoom }: { roomId: string
                                 <input type="text"
                                     placeholder="Folder Name"
                                     className="border border-gray-300 rounded-md p-2"></input>
-                                <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors duration-200" type="submit">Create</button>
+                                <button className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors duration-200"
+                                 type="submit"
+                                 disabled={processing}
+                                 >{processing?"Creating..":"Create"}</button>
                                 <button type="button"
+                                disabled={processing}
                                     className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400 transition-colors duration-200"
                                     onClick={() => setCreateFolderPopup(false)}>Cancel</button>
                             </form>

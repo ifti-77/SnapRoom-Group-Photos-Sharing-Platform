@@ -15,6 +15,7 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
         handleDownload: (url: string, index: number) => void
     }) => {
 
+    const [fullScreenPhoto, setFullScreenPhoto] = React.useState<{photo:Photo, index:number} | null>(null)
     const handleDeletePhoto = async (photoId: string) => {
 
         if (!confirm("Are you sure you want to delete this photo? This action cannot be undone.")) {
@@ -61,6 +62,11 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
                         <img
                             src={photo.url}
                             alt={`Photo ${index + 1}`}
+                            onClick={() => {
+                                if (!selectMultiple) {
+                                    setFullScreenPhoto({photo, index})
+                                }
+                            }}
                             className="w-full h-full object-cover"
                         />
 
@@ -106,13 +112,66 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
                                         handleDeletePhoto(photo.id)
                                     }}
                                 >
-                                    &times;
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24px" width="24px" fill="#EA3323"><path d="M7,21q-0.82,0-1.41-0.59T5,19V6H4V4H9V3h6V4h5V6H19V19q0,0.82-0.59,1.41T17,21H7ZM17,6H7V19H17V6ZM9,17h2V8H9v9Zm4,0h2V8H13v9ZM7,6V19V6Z"/></svg>
                                 </button>
                             </div>
                         )}
                     </div>
                 );
             })}
+            {
+                fullScreenPhoto && (
+                    <div className="fixed inset-0 w-full h-full z-50 bg-black/10 backdrop-blur-lg items-center">
+                        <div className="relative flex flex-col items-center justify-center h-full">
+                            <div className="absolute top-2 right-2 flex gap-1.5">
+                                <button
+                                    type="button"
+                                    onClick={() => handleDownload(fullScreenPhoto.photo.url, fullScreenPhoto.index)}
+                                    className="bg-black/75 hover:bg-black text-white rounded w-9 h-9 flex items-center justify-center"
+                                    title="Download photo"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={2}
+                                        stroke="currentColor"
+                                        className="w-3.5 h-3.5"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M7.5 12l4.5 4.5m0 0l4.5-4.5M12 3v13.5"
+                                        />
+                                    </svg>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="bg-black/75 hover:bg-red-600 text-white rounded w-9 h-9 flex items-center justify-center text-base leading-none"
+                                    title="Delete photo"
+                                    onClick={() => {
+                                        handleDeletePhoto(fullScreenPhoto.photo.id)
+                                    }}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24px" width="24px" fill="#EA3323"><path d="M7,21q-0.82,0-1.41-0.59T5,19V6H4V4H9V3h6V4h5V6H19V19q0,0.82-0.59,1.41T17,21H7ZM17,6H7V19H17V6ZM9,17h2V8H9v9Zm4,0h2V8H13v9ZM7,6V19V6Z"/></svg>
+                                </button>
+                                <button
+                                    className=" bg-black/75 hover:bg-orange-600 text-white rounded w-9 h-9 flex items-center justify-center text-lg leading-none"
+                                    onClick={() => setFullScreenPhoto(null)}
+                                >
+                                    &times;
+                                </button>
+                                </div>
+                                <img
+                                    src={fullScreenPhoto.photo.url}
+                                    alt={`Photo ${fullScreenPhoto.index + 1}`}
+                                    className="w-full h-full object-bottom object-contain max-h-[90vh] max-w-[90vw]"
+                                />
+                        </div>
+
+                    </div>)
+            }
         </div>
     )
 }

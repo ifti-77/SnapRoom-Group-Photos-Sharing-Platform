@@ -1,11 +1,11 @@
 
-export enum DeletePin{
-    NoPin = "NoPin",
+export enum DeletePin {
+  NoPin = "NoPin",
 }
 
 export interface Photo {
-    id: string
-    url: string
+  id: string
+  url: string
 }
 
 export interface Folder {
@@ -22,7 +22,15 @@ export interface RoomData {
   folders: Folder[]
 }
 
-export interface FolderStructure{
+export interface FolderStructure {
   currentFolder: Folder | null
   parentFolder: Folder | null
+}
+
+export interface Message {
+  id: string
+  senderEmoji: string
+  senderIdentity: string
+  text: string
+  createdAt: string
 }

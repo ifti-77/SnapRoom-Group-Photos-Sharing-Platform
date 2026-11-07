@@ -14,6 +14,7 @@ import FoldersContainer from "./FoldersContainer";
 import PhotoContainer from "./PhotoContainer";
 
 import Pusher from "pusher-js";
+import ChatSystem from "./ChatSystem";
 
 
 
@@ -595,6 +596,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
           </div>
         </div>
       )}
+      <ChatSystem roomId={roomId}></ChatSystem>
 
     </div>
   )
