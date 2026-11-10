@@ -121,7 +121,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   }
   async function fetchRoom() {
     try {
-      const response = await fetch(`/api/room/${roomId}`, { cache: "no-store" })
+      const response = await fetch(`/api/room/get-room/${roomId}`, { cache: "no-store" })
 
       if (!response.ok && response.status === 404) {
         setRoomNotFound(true)
@@ -241,7 +241,7 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
       } else {
         finalPin = DeletePin.NoPin
       }
-      const res = await fetch(`/api/room/${roomId}`, {
+      const res = await fetch(`/api/room/delete-room/${roomId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

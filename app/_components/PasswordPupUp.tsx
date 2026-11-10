@@ -5,7 +5,7 @@ import {setCookie} from "cookies-next"
 
 
 const setCookieFuntion = async () => {
-    await setCookie("verified_user", "true", { secure: true, path: "/",sameSite:"lax", maxAge: 1800 })
+    await setCookie("verified_user", "true", { secure: true, path: "/",sameSite:"lax", maxAge: 3600 })
 }
 
 function PasswordPupUp({ roomId, setPasswordRequired }: { roomId: string, setPasswordRequired: React.Dispatch<React.SetStateAction<boolean>> }) {
@@ -18,7 +18,7 @@ function PasswordPupUp({ roomId, setPasswordRequired }: { roomId: string, setPas
         setLoading(true)
         try {
 
-            const respone = await fetch(`/api/room/${roomId}`, {
+            const respone = await fetch(`/api/room/verify-room/${roomId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -40,7 +40,7 @@ function PasswordPupUp({ roomId, setPasswordRequired }: { roomId: string, setPas
                 setPasswordRequired(false)
             }
         } catch (error) {
-            console.error("Error submitting password:", error);
+            alert(error)
         } finally {
             setLoading(false)
         }
@@ -48,28 +48,30 @@ function PasswordPupUp({ roomId, setPasswordRequired }: { roomId: string, setPas
 
     return (
         <div>
-            {loading && <LoadingScreen message="Verifying Password..."
+            {loading && <LoadingScreen message="Verifying Password"
                 subtext="Please wait while we verify the password for the room"
                 fullScreen={true} />}
             <div className="fixed inset-0 bg-black bg-opacity-50 z-30 flex items-center justify-center">
-                <div className="bg-white p-6 rounded shadow-lg w-80">
-                    <h2 className="text-lg font-semibold mb-4">Enter Password</h2>
+                <div className="bg-white p-3 rounded-sm w-80">
+
+                    <h2 className="font-mono text-lg font-semibold mb-4">Enter Password</h2>
                     <form onSubmit={handleSubmit}>
                         <input
                             type="password"
                             placeholder="Enter password"
-                            className="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="w-full border border-gray-300 rounded-sm outline-orange-300 px-3 py-2 mb-4"
                         />
                         <div className="flex justify-end gap-2">
                             <button type="button"
-                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded"
+                                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold px-4 py-2 rounded-md"
                                 onClick={() => {
                                     router.push('/')
-                                }}>
+                                }}
+                                disabled={loading}>
                                 Cancel
                             </button>
                             <button type="submit"
-                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded"
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-md"
                                 disabled={loading}>
                                 Submit
                             </button>

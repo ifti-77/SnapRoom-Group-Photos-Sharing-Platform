@@ -99,8 +99,10 @@ function FoldersContainer(FoldersContainerProps: FoldersContainerProps) {
                 {folderState.currentFolder !== null && ` -> ${folderState.currentFolder.name}`}
             </div>
             {folderState.currentFolder !== null && (
-                <div className="mb-4">
-                    <button onClick={() => {
+                <div className="mb-6">
+                    <button 
+                    className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 hover:text-gray-900 font-semibold py-2 px-4 rounded-md transition-colors duration-200"
+                    onClick={() => {
                         if (folderState.currentFolder !== null) {
                             const parentFolder = room?.folders?.find(f => f.id === folderState.currentFolder?.parent_folder_id) || null
                             setFolderState({
@@ -109,6 +111,7 @@ function FoldersContainer(FoldersContainerProps: FoldersContainerProps) {
                             })
                         }
                     }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" height="24px" width="24px" fill="#EA3323"><path d="M7.83,13l5.6,5.6L12,20L4,12l8-8l1.43,1.4L7.83,11H20v2H7.83Z"/></svg>
                         Back
                     </button>
                 </div>)}

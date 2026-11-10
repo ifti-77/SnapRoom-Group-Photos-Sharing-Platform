@@ -32,7 +32,7 @@ export async function GET(
 
     return NextResponse.json(photoUrls);
   } catch (error) {
-    console.error("Error fetching photos:", error);
+    // console.error("Error fetching photos:", error);
     return NextResponse.json(
       { error: "Failed to fetch photos" },
       { status: 500 }

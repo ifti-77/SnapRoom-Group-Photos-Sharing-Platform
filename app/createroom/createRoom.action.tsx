@@ -25,7 +25,7 @@ export async function createRoom(previousState: any, formData: FormData): Promis
         let finalPin: string | null = null
 
         console.log("Received form data:", { roomName, delete_pin, confirm_delete_pin });
-        // throw new Error("This is a test error to check error handling in createRoom function.");
+
         if(delete_pin?.trim() !== "" )
         {
 

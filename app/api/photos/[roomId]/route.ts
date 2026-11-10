@@ -101,7 +101,7 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
-    console.error("Bulk delete error:", error);
+
     return NextResponse.json(
       { error: "Failed to delete photos" },
       { status: 500 }

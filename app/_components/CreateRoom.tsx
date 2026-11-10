@@ -117,7 +117,7 @@ export default function CreateRoom() {
                     Back to Home
                 </Link>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight mb-6">Create a New Room</h2>
+            <h2 className="text-2xl font-bold tracking-tight mb-6">Create New Room</h2>
 
             {state?.success === false && (
                 <div className="border-2 border-red-500 rounded-sm bg-red-50 text-red-600 text-sm p-3 mb-6 font-medium">
@@ -213,9 +213,6 @@ export default function CreateRoom() {
                     </p>
                 )}
 
-                <p className="text-xs text-neutral-400">
-                    * Note: Photos will automatically expire after 24 hours.
-                </p>
 
                 <button
                     type="submit"

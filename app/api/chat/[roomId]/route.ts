@@ -13,7 +13,6 @@ export async function GET(request: Request, {params}: {params: Promise<{roomId: 
         return NextResponse.json(messages, { status: 200 })
 
     }catch (error: any) {
-    console.error("Message insert error:", error);
     return NextResponse.json(
       { error: error.message || "Failed to post message" },
       { status: 500 }
@@ -50,7 +49,7 @@ export async function POST(
 
     return NextResponse.json(newMessage, { status: 201 });
   } catch (error: any) {
-    console.error("Message insert error:", error);
+
     return NextResponse.json(
       { error: error.message || "Failed to post message" },
       { status: 500 }
