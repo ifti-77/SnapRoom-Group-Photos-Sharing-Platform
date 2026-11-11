@@ -41,7 +41,7 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
     }
 
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {photos.map((photo, index) => {
                 const isSelected = selectedPhotos.includes(photo);
 
@@ -67,7 +67,7 @@ const PhotoContainer = ({ photos, setPhotos, roomId,
                                     setFullScreenPhoto({photo, index})
                                 }
                             }}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover cursor-pointer"
                         />
 
                         {selectMultiple && (

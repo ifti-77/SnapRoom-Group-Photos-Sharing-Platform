@@ -59,30 +59,30 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
     })
 
     const channel = pusherReciever.subscribe(`room-${roomId}`)
-    channel.bind("photo:uploaded", (data:any) => {
-      
+    channel.bind("photo:uploaded", (data: any) => {
+
       fetchPhotos()
     })
-    channel.bind("photos:deleted", (data:any) => {
-      
+    channel.bind("photos:deleted", (data: any) => {
+
       fetchPhotos()
     })
 
-    channel.bind("folder:created", (data:any) => {
+    channel.bind("folder:created", (data: any) => {
       fetchRoom()
     })
-    channel.bind("folder:updated", (data:any) => {
+    channel.bind("folder:updated", (data: any) => {
       fetchRoom()
     })
-    channel.bind("folder:deleted", (data:any) => {
+    channel.bind("folder:deleted", (data: any) => {
       fetchRoom()
     })
 
     return () => {
-    channel.unbind_all()
-    channel.unsubscribe()
-    pusherReciever.disconnect()
-  }
+      channel.unbind_all()
+      channel.unsubscribe()
+      pusherReciever.disconnect()
+    }
 
   }, [roomId])
   useEffect(() => {
@@ -349,43 +349,13 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
   }
 
   return (
-    <div className="max-w-9xl min-w-screen mx-auto px-4 py-8 text-neutral-900">
-      <div className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-4 h-4"
+    <div className="max-w-9xl  px-4 py-8 text-neutral-900">
+      <div className="flex flex-col gap-0.5">
+        <div className="mb-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-            />
-          </svg>
-          Back to Home
-        </Link>
-      </div>
-
-      {passwordRequired && <PasswordPupUp roomId={room?.id || ""} setPasswordRequired={setPasswordRequired} />}
-
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-neutral-200">
-        <div className=" flex flex-col gap-2">
-          <h1 className="text-xl font-bold text-neutral-900">Room: {room?.name || "No room found"}</h1>
-          <p className="text-sm text-neutral-600 mt-1">
-            Share ID with friends:{" "}
-            <span className="font-mono text-xs bg-neutral-100 text-neutral-800 border border-neutral-300 px-2 py-0.5 rounded">
-              {room?.id || "No room found"}
-            </span>
-          </p>
-          <button className="block bg-gray-800 text-white border border-gray-400 font-mono rounded-sm"
-            onClick={() => setShowQRCode(!showQRCode)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -397,37 +367,69 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                d="M3.75 4.5A1.5 1.5 0 0 1 5.25 3h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 8.25 9h-3a1.5 1.5 0 0 1-1.5-1.5v-3ZM3.75 16.5A1.5 1.5 0 0 1 5.25 15h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 8.25 21h-3a1.5 1.5 0 0 1-1.5-1.5v-3ZM15.75 4.5A1.5 1.5 0 0 1 17.25 3h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 20.25 9h-3a1.5 1.5 0 0 1-1.5-1.5v-3Z"
+                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
               />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 15h.008v.008H15V15Zm3 0h.008v.008H18V15Zm-3 3h.008v.008H15V18Zm3 3h.008v.008H18V21Zm3-3h.008v.008H21V18Zm0-3h.008v.008H21V15Zm-6 6h.008v.008H15V21Z"
-              />
-            </svg>View QR Code</button>
-          {
-            showQRCode && (
-              <div className="fixed inset-1 z-40 bg-gray-900/5 flex items-center justify-center backdrop-blur-sm"
-                onClick={() => setShowQRCode(false)}>
-                <div className="bg-white m-4 p-6  border border-neutral-200"
-                  onClick={(e) => e.stopPropagation()}>
-                  <div className="flex justify-between items-center mb-4">
-                    <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5">
-                      Scan QR Code to join room
-                    </label>
-                    <button className=" text-neutral-500 hover:text-neutral-900"
-                      onClick={() => setShowQRCode(false)}>
-                      &times;
-                    </button>
+            </svg>
+            Back to Home
+          </Link>
+        </div>
+
+        {passwordRequired && <PasswordPupUp roomId={room?.id || ""} setPasswordRequired={setPasswordRequired} />}
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-neutral-200">
+          <div className=" flex flex-col gap-2">
+            <h1 className="text-xl font-bold text-neutral-900">Room: {room?.name || "No room found"}</h1>
+            <p className="text-sm text-neutral-600 mt-1">
+              Share ID with friends:{" "}
+              <span className="font-mono text-xs bg-neutral-100 text-neutral-800 border border-neutral-300 px-2 py-0.5 rounded">
+                {room?.id || "No room found"}
+              </span>
+            </p>
+            <button className="block bg-gray-800 text-white border border-gray-400 font-mono rounded-sm"
+              onClick={() => setShowQRCode(!showQRCode)}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 4.5A1.5 1.5 0 0 1 5.25 3h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 8.25 9h-3a1.5 1.5 0 0 1-1.5-1.5v-3ZM3.75 16.5A1.5 1.5 0 0 1 5.25 15h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 8.25 21h-3a1.5 1.5 0 0 1-1.5-1.5v-3ZM15.75 4.5A1.5 1.5 0 0 1 17.25 3h3a1.5 1.5 0 0 1 1.5 1.5v3A1.5 1.5 0 0 1 20.25 9h-3a1.5 1.5 0 0 1-1.5-1.5v-3Z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 15h.008v.008H15V15Zm3 0h.008v.008H18V15Zm-3 3h.008v.008H15V18Zm3 3h.008v.008H18V21Zm3-3h.008v.008H21V18Zm0-3h.008v.008H21V15Zm-6 6h.008v.008H15V21Z"
+                />
+              </svg>View QR Code</button>
+            {
+              showQRCode && (
+                <div className="fixed inset-1 z-40 bg-gray-900/5 flex items-center justify-center backdrop-blur-sm"
+                  onClick={() => setShowQRCode(false)}>
+                  <div className="bg-white m-4 p-6  border border-neutral-200"
+                    onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-between items-center mb-4">
+                      <label className="block text-xs font-mono uppercase tracking-wider text-neutral-500 mb-1.5">
+                        Scan QR Code to join room
+                      </label>
+                      <button className=" text-neutral-500 hover:text-neutral-900"
+                        onClick={() => setShowQRCode(false)}>
+                        &times;
+                      </button>
+                    </div>
+                    <QRCodeSVG value={roomUrl} size={200}
+                      bgColor="#ffffff"
+                      fgColor="#0a0a0a"
+                      level="M" />
                   </div>
-                  <QRCodeSVG value={roomUrl} size={200}
-                    bgColor="#ffffff"
-                    fgColor="#0a0a0a"
-                    level="M" />
                 </div>
-              </div>
-            )
-          }
+              )
+            }
+          </div>
           {roomOwner && <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded"
             onClick={() => {
               if (room?.delete_pin !== DeletePin.NoPin) {
@@ -440,107 +442,116 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
 
             }}>Delete Room</button>}
           <CreateFolderSystem roomId={roomId} folderState={folderState} fetchRoom={fetchRoom} />
-        </div>
 
 
-        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
 
-          {photos.length > 0 && (
-            <button
-              type="button"
-              className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
-              onClick={() => setSelectMultiple(!selectMultiple)}
-            >
-              {selectMultiple ? "Cancel" : "Select Photos"}
-            </button>
-          )}
-          {selectMultiple && (
-            <div className="flex flex-col flex-wrap items-start gap-2">
-              <div className="flex gap-2">
+            <div className="relative flex flex-col justify-center items-center gap-1">
+              {selectMultiple && (
+                <div className="sm:absolute sm:top-10 z-50 backdrop-blur-lg items-center">
+                  <div className="flex flex-col flex-wrap justify-center items-start gap-2 border border-gray-300 rounded p-2">
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSelectAll}
+                        className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
+                      >
+                        {selectedPhotos.length === photos.length
+                          ? "Deselect All"
+                          : "Select All"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={downloadAsZip ? (selectedPhotos.length <= 1 || isZipping) : (selectedPhotos.length < 1 || isDownloading)}
+                        onClick={() => {
+                          if (downloadAsZip) {
+                            handleDownloadZip()
+                          } else {
+                            handleBlukDownload()
+                          }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded"
+                      >
+                        {downloadAsZip ? (isZipping
+                          ? "Zipping..."
+                          : `Download ZIP (${selectedPhotos.length})`) : (isDownloading
+                            ? "Downloading..."
+                            : `Download (${selectedPhotos.length})`)}
+                      </button>
+                      <div className="flex items-center gap-1">
+                        <input type="checkbox" checked={downloadAsZip} onChange={() => setDownloadAsZip(!downloadAsZip)} name="downloadAsZip"></input>
+                        <label htmlFor="downloadAsZip" className="text-sm text-neutral-600">Download as ZIP</label>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ">
+                      <button className={`${selectedPhotos.length < 1 ? 'bg-red-200 hover:bg-red-300' : 'bg-red-500 hover:bg-red-600'}  text-white text-sm font-medium px-4 py-2 rounded`}
+                        onClick={handleDeleteSelectedPhotos}
+                        disabled={selectedPhotos.length < 1}
+                      >
+                        Delete Selected
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {photos.length > 1 && (
                 <button
                   type="button"
-                  onClick={handleSelectAll}
                   className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
+                  onClick={() => setSelectMultiple(!selectMultiple)}
                 >
-                  {selectedPhotos.length === photos.length
-                    ? "Deselect All"
-                    : "Select All"}
+                  {selectMultiple ? "Cancel" : "Select Photos"}
                 </button>
+              )}
 
-                <button
-                  type="button"
-                  disabled={downloadAsZip ? (selectedPhotos.length <= 1 || isZipping) : (selectedPhotos.length < 1 || isDownloading)}
-                  onClick={() => {
-                    if (downloadAsZip) {
-                      handleDownloadZip()
-                    } else {
-                      handleBlukDownload()
-                    }
+
+            </div>
+            {roomId && (
+              <div className="shrink-0">
+                <UploadButton
+                  input={{ roomId, folderId: folderState.currentFolder?.id || null }}
+                  endpoint="imageUploader"
+                  appearance={{
+                    container: "items-start sm:items-end",
+                    button:
+                      "bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium px-4 py-2 rounded h-auto",
+                    allowedContent: "text-xs text-neutral-500 mt-1",
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded"
-                >
-                  {downloadAsZip ? (isZipping
-                    ? "Zipping..."
-                    : `Download ZIP (${selectedPhotos.length})`) : (isDownloading
-                      ? "Downloading..."
-                      : `Download (${selectedPhotos.length})`)}
-                </button>
-                <input type="checkbox" checked={downloadAsZip} onChange={() => setDownloadAsZip(!downloadAsZip)} name="downloadAsZip"></input>
-                <label htmlFor="downloadAsZip" className="text-sm text-neutral-600">Download as ZIP</label>
+                  onClientUploadComplete={async () => {
+                    await fetchPhotos()
+                  }}
+                />
               </div>
-              <div className="flex gap-2 ">
-                <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium px-4 py-2 rounded"
-                  onClick={handleDeleteSelectedPhotos}
-                >
-                  Delete Selected
-                </button>
-              </div>
-            </div>
-          )}
-          {roomId && (
-            <div className="shrink-0">
-              <UploadButton
-                input={{ roomId, folderId: folderState.currentFolder?.id || null }}
-                endpoint="imageUploader"
-                appearance={{
-                  container: "items-start sm:items-end",
-                  button:
-                    "bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium px-4 py-2 rounded h-auto",
-                  allowedContent: "text-xs text-neutral-500 mt-1",
-                }}
-                onClientUploadComplete={async () => {
-                  await fetchPhotos()
-                }}
-              />
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {loading && (
+          <LoadingScreen
+            message="Loading dumps.."
+            subtext="unpacking snaps hangtight,, don't close the tab"
+            fullScreen={true}
+          />
+        )}
+
+        <FoldersContainer room={room as RoomData}
+          setRoom={setRoom}
+          moveFolderInstance={moveFolderInstance}
+          setMoveFolderInstance={setMoveFolderInstance}
+          folderState={folderState as FolderStructure}
+          setFolderState={setFolderState}></FoldersContainer>
+
+        {!loading && photos.length === 0 && (
+          <div className="border border-double border-orange-200 rounded py-12 text-center">
+            <p className="text-neutral-500 text-sm">No photos in this room yet</p>
+          </div>
+        )}
+
+        <PhotoContainer photos={photos} setPhotos={setPhotos} roomId={roomId}
+          selectedPhotos={selectedPhotos} selectMultipleImages={selectMultipleImages}
+          selectMultiple={selectMultiple} handleDownload={handleDownload}></PhotoContainer>
       </div>
-
-      {loading && (
-        <LoadingScreen
-          message="Loading dumps.."
-          subtext="unpacking snaps hangtight,, don't close the tab"
-          fullScreen={true}
-        />
-      )}
-
-      <FoldersContainer room={room as RoomData}
-        setRoom={setRoom}
-        moveFolderInstance={moveFolderInstance}
-        setMoveFolderInstance={setMoveFolderInstance}
-        folderState={folderState as FolderStructure}
-        setFolderState={setFolderState}></FoldersContainer>
-
-      {!loading && photos.length === 0 && (
-        <div className="border border-dashed border-neutral-300 rounded py-12 text-center">
-          <p className="text-neutral-500 text-sm">No photos in this room yet.</p>
-        </div>
-      )}
-
-      <PhotoContainer photos={photos} setPhotos={setPhotos} roomId={roomId}
-        selectedPhotos={selectedPhotos} selectMultipleImages={selectMultipleImages}
-        selectMultiple={selectMultiple} handleDownload={handleDownload}></PhotoContainer>
 
       {deleteRoomPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
