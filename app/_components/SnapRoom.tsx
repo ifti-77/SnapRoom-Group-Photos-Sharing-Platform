@@ -499,7 +499,10 @@ export default function SnapRoom({ params }: { params: Promise<{ roomId: string 
                 <button
                   type="button"
                   className="border border-neutral-300 hover:bg-neutral-100 text-neutral-800 text-sm font-medium px-3.5 py-2 rounded"
-                  onClick={() => setSelectMultiple(!selectMultiple)}
+                  onClick={() => {
+                    selectedPhotos.length > 0 && setSelectedPhotos([])
+                    setSelectMultiple(!selectMultiple)
+                  }}
                 >
                   {selectMultiple ? "Cancel" : "Select Photos"}
                 </button>
