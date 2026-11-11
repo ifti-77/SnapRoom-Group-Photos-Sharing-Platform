@@ -10,11 +10,11 @@ SnapRoom is a lightweight, zero-login, real-time photo sharing platform designed
 
 | Home & Room Discovery | Room Creation |
 | :---: | :---: |
-| ![SnapRoom Home Page](screenshots/home%20page.jpg) | ![Create Room](screenshots/create%20room.png) |
+| ![SnapRoom Home Page](screenshots/home%20page.png) | ![Create Room](screenshots/create%20room.png) |
 
 | Room View & Folder Management |
 | :---: |
-| ![SnapRoom Room View](screenshots/room%20view.jpg) |
+| ![SnapRoom Room View](screenshots/room%20view.png) |
 
 ---
 
@@ -54,7 +54,7 @@ SnapRoom is a lightweight, zero-login, real-time photo sharing platform designed
 | **Styling** | [Tailwind CSS](https://tailwindcss.com/) |
 | **Language** | [TypeScript](https://www.typescriptlang.org/) |
 | **Utilities** | `jszip`, `file-saver`, `qrcode.react`, `cookies-next`, `zod` |
-| **Deployment** | [Vercel](https://vercel.com/) |
+| **Deployment** | [Vercel](https://snaproomx.vercel.app/) |
 
 ---
 
